@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from app.persistencia.database.database import Base, engine
 from app.presentacion.routers.analysis_router import router as analysis_router
 from app.presentacion.routers.auth_router import router as auth_router
+from app.presentacion.routers.admin_router import router as admin_router
 
 app = FastAPI(title="Analizador Estático de Código")
 
@@ -20,6 +21,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(analysis_router)
 app.include_router(auth_router)
+app.include_router(admin_router)
 
 
 @app.get("/")
@@ -30,3 +32,8 @@ async def root() -> FileResponse:
 @app.get("/dashboard")
 async def dashboard() -> FileResponse:
     return FileResponse("app/presentacion/static/dashboard.html")
+
+
+@app.get("/admin")
+async def admin_dashboard() -> FileResponse:
+    return FileResponse("app/presentacion/static/admin_dashboard.html")

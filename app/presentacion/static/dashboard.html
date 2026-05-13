@@ -75,6 +75,7 @@
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="metric-chip">Usuario: <strong id="current-user">-</strong></span>
+          <a id="admin-link" href="/admin" class="btn btn-outline-primary btn-sm d-none">Panel Admin</a>
           <button id="logout-button" class="btn btn-outline-danger btn-sm" type="button">Cerrar Sesion</button>
         </div>
       </div>
@@ -375,7 +376,13 @@
       window.location.href = "/";
     }
 
-    document.getElementById("current-user").textContent = userId || "-";
+    const userRole = localStorage.getItem("user_role");
+    
+    document.getElementById("current-user").textContent = localStorage.getItem("username") || userId || "-";
+
+    if (userRole === "admin") {
+      document.getElementById("admin-link").classList.remove("d-none");
+    }
 
     const uploadForm = document.getElementById("upload-form");
     const githubForm = document.getElementById("github-form");
@@ -849,6 +856,23 @@
 
     initBootstrapTooltips();
     loadHistoryAndRender();
+    logoutButton.addEventListener("click", async () => {
+      try {
+        const formData = new FormData();
+        formData.append("user_id", userId);
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          body: formData,
+        });
+      } catch (error) {
+        console.error("Error al cerrar sesión", error);
+      } finally {
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("user_role");
+        localStorage.removeItem("username");
+        window.location.href = "/";
+      }
+    });
   </script>
 </body>
 </html>

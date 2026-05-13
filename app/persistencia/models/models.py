@@ -14,8 +14,13 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(50), nullable=False)
     active_status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_logged_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     analysis_reports: Mapped[list["AnalysisReport"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    actions: Mapped[list["UserActionLog"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -33,3 +38,14 @@ class AnalysisReport(Base):
     code_smells: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     user: Mapped[User] = relationship(back_populates="analysis_reports")
+
+
+class UserActionLog(Base):
+    __tablename__ = "user_action_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    action: Mapped[str] = mapped_column(String(255), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+
+    user: Mapped[User] = relationship(back_populates="actions")
