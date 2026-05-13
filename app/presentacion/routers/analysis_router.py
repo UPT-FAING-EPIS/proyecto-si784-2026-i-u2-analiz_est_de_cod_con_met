@@ -59,6 +59,32 @@ async def upload_code_analysis(
     }
 
 
+@router.post("/github")
+async def analyze_github_repo(
+    repo_url: str = Form(...),
+    user_id: int = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analiza un repositorio de GitHub y guarda el reporte en la BD."""
+    repository = AnalysisRepository(db)
+    coordinator = AnalysisCoordinator(repository)
+
+    report = coordinator.process_and_save_github_repo(
+        user_id=user_id,
+        repo_url=repo_url,
+    )
+
+    return {
+        "id": report.id,
+        "user_id": report.user_id,
+        "project_name": report.project_name,
+        "analysis_date": report.analysis_date.isoformat(),
+        "loc": report.loc,
+        "complexity": report.complexity,
+        "code_smells": report.code_smells,
+    }
+
+
 @router.get("/history/{user_id}")
 async def get_analysis_history(
     user_id: int,

@@ -1,3 +1,7 @@
+import os
+import tempfile
+import urllib.request
+import zipfile
 from typing import Any, Dict
 
 from app.motor_analisis.services import analyze_code
@@ -42,6 +46,100 @@ class AnalysisCoordinator:
         report = self.repository.create_report(
             user_id=user_id,
             project_name=project_name,
+            loc=loc,
+            complexity=complexity,
+            code_smells=code_smells_payload,
+        )
+
+        return report
+
+    def process_and_save_github_repo(
+        self,
+        user_id: int,
+        repo_url: str,
+    ) -> AnalysisReport:
+        """Descarga un repositorio, lo analiza y guarda el reporte consolidado."""
+        parts = repo_url.rstrip("/").split("/")
+        if len(parts) < 2:
+            raise ValueError("URL de repositorio inválida")
+        owner, repo = parts[-2], parts[-1]
+        if repo.endswith(".git"):
+            repo = repo[:-4]
+            
+        zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
+        
+        loc = 0
+        complexity = 0
+        nom = 0
+        npm = 0
+        noa = 0
+        cloc = 0
+        code_smells = []
+        files_data = []
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            zip_path = os.path.join(temp_dir, "repo.zip")
+            
+            req = urllib.request.Request(zip_url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response, open(zip_path, 'wb') as out_file:
+                out_file.write(response.read())
+            
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+                
+            for root, _, files in os.walk(temp_dir):
+                for file in files:
+                    ext = os.path.splitext(file)[1].lower()
+                    if ext in [".java", ".cs", ".py"]:
+                        file_path = os.path.join(root, file)
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                code_string = f.read()
+                        except UnicodeDecodeError:
+                            continue
+                            
+                        rel_path = os.path.relpath(file_path, temp_dir)
+                        path_parts = rel_path.split(os.sep)
+                        if len(path_parts) > 1:
+                            rel_path = os.path.join(*path_parts[1:])
+                            
+                        analysis = analyze_code(code_string, extension=ext)
+                        
+                        file_loc = int(analysis.get("loc", 0))
+                        file_complexity = int(analysis.get("complexity", 0))
+                        file_nom = int(analysis.get("nom", 0))
+                        file_npm = int(analysis.get("npm", 0))
+                        file_noa = int(analysis.get("noa", 0))
+                        file_cloc = int(analysis.get("cloc", 0))
+                        file_smells = analysis.get("code_smells", [])
+
+                        loc += file_loc
+                        complexity += file_complexity
+                        nom += file_nom
+                        npm += file_npm
+                        noa += file_noa
+                        cloc += file_cloc
+                        
+                        files_data.append({
+                            "file_path": rel_path,
+                            "loc": file_loc,
+                            "complexity": file_complexity,
+                            "metrics": {"nom": file_nom, "npm": file_npm, "noa": file_noa, "cloc": file_cloc},
+                            "smells": file_smells
+                        })
+                        
+                        for smell in file_smells:
+                            code_smells.append(f"[{rel_path}] {smell}")
+                            
+        code_smells_payload: Dict[str, Any] = {
+            "smells": code_smells,
+            "metrics": {"nom": nom, "npm": npm, "noa": noa, "cloc": cloc},
+            "files": files_data,
+        }
+
+        report = self.repository.create_report(
+            user_id=user_id,
+            project_name=f"{owner}/{repo}",
             loc=loc,
             complexity=complexity,
             code_smells=code_smells_payload,

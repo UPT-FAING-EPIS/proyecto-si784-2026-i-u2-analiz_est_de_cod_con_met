@@ -82,89 +82,113 @@
 
     <section class="glass-card p-4 mb-4">
       <h2 class="h5 mb-3">Subir Código para Análisis</h2>
-      <form id="upload-form" class="row g-3" novalidate>
-        <div class="col-md-9">
-          <label for="code-file" class="form-label">Archivo (.java, .cs, .py)</label>
-          <input
-            id="code-file"
-            name="file"
-            class="form-control"
-            type="file"
-            accept=".java, .cs, .py"
-            required
-          />
-          <div class="form-text">Se enviará a /api/analysis/upload para análisis y persistencia.</div>
+      <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="pills-file-tab" data-bs-toggle="pill" data-bs-target="#pills-file" type="button" role="tab" aria-controls="pills-file" aria-selected="true">Archivo Local</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="pills-github-tab" data-bs-toggle="pill" data-bs-target="#pills-github" type="button" role="tab" aria-controls="pills-github" aria-selected="false">Repositorio GitHub</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-file" role="tabpanel" aria-labelledby="pills-file-tab">
+          <form id="upload-form" class="row g-3" novalidate>
+            <div class="col-md-9">
+              <label for="code-file" class="form-label">Archivo (.java, .cs, .py)</label>
+              <input
+                id="code-file"
+                name="file"
+                class="form-control"
+                type="file"
+                accept=".java, .cs, .py"
+                required
+              />
+              <div class="form-text">Se enviará a /api/analysis/upload para análisis y persistencia.</div>
+            </div>
+            <div class="col-md-3 d-flex flex-column gap-2 justify-content-end">
+              <button id="upload-button" class="btn btn-primary w-100" type="submit">Analizar y Guardar</button>
+              <div class="dropdown w-100">
+                <button
+                  class="btn btn-outline-secondary dropdown-toggle w-100"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Descargar Ejemplos
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end w-100">
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/analizador_trafico.py" download>
+                      <span><span class="me-2">🐍</span>analizador_trafico.py</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ClienteDTO.cs" download>
+                      <span><span class="me-2">#️⃣</span>ClienteDTO.cs</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ControladorPagos.cs" download>
+                      <span><span class="me-2">#️⃣</span>ControladorPagos.cs</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/DeudaTecnica.java" download>
+                      <span><span class="me-2">☕</span>DeudaTecnica.java</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ProcesadorNomina.cs" download>
+                      <span><span class="me-2">#️⃣</span>ProcesadorNomina.cs</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/Prueba.java" download>
+                      <span><span class="me-2">☕</span>Prueba.java</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/SistemaMonolitico.java" download>
+                      <span><span class="me-2">☕</span>SistemaMonolitico.java</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/UsuarioDTO.java" download>
+                      <span><span class="me-2">☕</span>UsuarioDTO.java</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ValidadorSeguridad.java" download>
+                      <span><span class="me-2">☕</span>ValidadorSeguridad.java</span>
+                      <span class="text-muted small">Descargar</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="col-md-3 d-flex flex-column gap-2 justify-content-end">
-          <button id="upload-button" class="btn btn-primary w-100" type="submit">Analizar y Guardar</button>
-          <div class="dropdown w-100">
-            <button
-              class="btn btn-outline-secondary dropdown-toggle w-100"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Descargar Ejemplos
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end w-100">
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/analizador_trafico.py" download>
-                  <span><span class="me-2">🐍</span>analizador_trafico.py</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ClienteDTO.cs" download>
-                  <span><span class="me-2">#️⃣</span>ClienteDTO.cs</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ControladorPagos.cs" download>
-                  <span><span class="me-2">#️⃣</span>ControladorPagos.cs</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/DeudaTecnica.java" download>
-                  <span><span class="me-2">☕</span>DeudaTecnica.java</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ProcesadorNomina.cs" download>
-                  <span><span class="me-2">#️⃣</span>ProcesadorNomina.cs</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/Prueba.java" download>
-                  <span><span class="me-2">☕</span>Prueba.java</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/SistemaMonolitico.java" download>
-                  <span><span class="me-2">☕</span>SistemaMonolitico.java</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/UsuarioDTO.java" download>
-                  <span><span class="me-2">☕</span>UsuarioDTO.java</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ValidadorSeguridad.java" download>
-                  <span><span class="me-2">☕</span>ValidadorSeguridad.java</span>
-                  <span class="text-muted small">Descargar</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+        <div class="tab-pane fade" id="pills-github" role="tabpanel" aria-labelledby="pills-github-tab">
+          <form id="github-form" class="row g-3" novalidate>
+            <div class="col-md-9">
+              <label for="github-url" class="form-label">URL del Repositorio de GitHub</label>
+              <input id="github-url" name="repo_url" class="form-control" type="url" placeholder="https://github.com/usuario/repositorio" required />
+              <div class="form-text">Se enviará a /api/analysis/github para descargar y analizar todo el código fuente del proyecto.</div>
+            </div>
+            <div class="col-md-3 d-flex flex-column justify-content-end">
+              <button id="github-button" class="btn btn-primary w-100" type="submit">Analizar Repositorio</button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
       <div id="upload-status" class="mt-3"></div>
     </section>
 
@@ -286,6 +310,57 @@
       </div>
       <div id="history-status" class="mt-3"></div>
     </section>
+
+    <section class="glass-card p-4 mb-4 d-none" id="file-details-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h5 mb-0">Detalle por Archivos (Último Análisis)
+          <span class="info-tip" data-bs-toggle="tooltip" title="Lista de archivos analizados. Clic izquierdo para ver en Archivo A, clic derecho para ver en Archivo B.">ℹ️</span>
+        </h2>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="mb-2 d-flex gap-2">
+            <input type="text" id="file-search" class="form-control form-control-sm" placeholder="Buscar archivo..." oninput="applyFileFilters()">
+            <select id="file-sort" class="form-select form-select-sm" style="width: auto;" onchange="applyFileFilters()">
+              <option value="name_asc">A-Z</option>
+              <option value="name_desc">Z-A</option>
+              <option value="loc_desc">LOC (Mayor)</option>
+              <option value="comp_desc">Comp. (Mayor)</option>
+              <option value="nom_desc">NOM (Mayor)</option>
+              <option value="noa_desc">NOA (Mayor)</option>
+            </select>
+          </div>
+          <div class="list-group" id="file-list" style="max-height: 400px; overflow-y: auto;">
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                  <span id="file-a-title" class="text-truncate" style="max-width: 80%;">Archivo A</span>
+                  <button class="btn btn-sm btn-outline-light" onclick="clearFile('A')">Limpiar</button>
+                </div>
+                <div class="card-body" id="file-a-details">
+                  <p class="text-muted">Selecciona un archivo de la lista para cargarlo aquí (Clic izquierdo).</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                  <span id="file-b-title" class="text-truncate" style="max-width: 80%;">Archivo B</span>
+                  <button class="btn btn-sm btn-outline-light" onclick="clearFile('B')">Limpiar</button>
+                </div>
+                <div class="card-body" id="file-b-details">
+                  <p class="text-muted">Haz clic derecho en un archivo de la lista para comparar aquí.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script
@@ -303,6 +378,8 @@
     document.getElementById("current-user").textContent = userId || "-";
 
     const uploadForm = document.getElementById("upload-form");
+    const githubForm = document.getElementById("github-form");
+    const githubUrlInput = document.getElementById("github-url");
     const codeFileInput = document.getElementById("code-file");
     const uploadStatus = document.getElementById("upload-status");
     const historyStatus = document.getElementById("history-status");
@@ -335,6 +412,24 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.detail || "No se pudo procesar el archivo.");
+      }
+
+      return data;
+    }
+
+    async function processGithubRepo(repoUrl) {
+      const formData = new FormData();
+      formData.append("repo_url", repoUrl);
+      formData.append("user_id", userId);
+
+      const response = await fetch("/api/analysis/github", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || "No se pudo procesar el repositorio de GitHub.");
       }
 
       return data;
@@ -550,9 +645,111 @@
             },
           },
         });
+
+        // Verificamos si existe data de archivos individuales (Github Repo)
+        let mp = last.code_smells ?? last.code_smells_payload ?? {};
+        if (typeof mp === 'string') {
+          try { mp = JSON.parse(mp); } catch (e) { mp = {}; }
+        }
+        
+        if (mp && mp.files && mp.files.length > 0) {
+          document.getElementById('file-details-section').classList.remove('d-none');
+          renderFileList(mp.files);
+        } else {
+          document.getElementById('file-details-section').classList.add('d-none');
+        }
+
       } catch (err) {
         console.error('Error renderStructureFromLast', err);
       }
+    }
+
+    let currentFilesData = [];
+    
+    function renderFileList(files) {
+      currentFilesData = files;
+      // Reiniciar buscador y filtros cuando llegan archivos nuevos
+      document.getElementById("file-search").value = "";
+      document.getElementById("file-sort").value = "name_asc";
+      applyFileFilters();
+    }
+
+    function applyFileFilters() {
+      const search = document.getElementById("file-search").value.toLowerCase();
+      const sort = document.getElementById("file-sort").value;
+      
+      let filtered = currentFilesData.filter(file => file.file_path.toLowerCase().includes(search));
+      
+      filtered.sort((a, b) => {
+        const nameA = a.file_path.split(/[\\/]/).pop().toLowerCase();
+        const nameB = b.file_path.split(/[\\/]/).pop().toLowerCase();
+        
+        switch(sort) {
+          case 'name_asc': return nameA.localeCompare(nameB);
+          case 'name_desc': return nameB.localeCompare(nameA);
+          case 'loc_desc': return b.loc - a.loc;
+          case 'comp_desc': return b.complexity - a.complexity;
+          case 'nom_desc': return (b.metrics?.nom || 0) - (a.metrics?.nom || 0);
+          case 'noa_desc': return (b.metrics?.noa || 0) - (a.metrics?.noa || 0);
+          default: return 0;
+        }
+      });
+      
+      const listContainer = document.getElementById("file-list");
+      listContainer.innerHTML = "";
+      
+      if (filtered.length === 0) {
+        listContainer.innerHTML = '<div class="p-3 text-muted small text-center">No se encontraron archivos.</div>';
+        return;
+      }
+      
+      filtered.forEach((file) => {
+        const item = document.createElement("button");
+        item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+        const fileName = file.file_path.split(/[\\/]/).pop();
+        
+        let badgeVal = file.loc;
+        let badgeLbl = "LOC";
+        if(sort === 'comp_desc') { badgeVal = file.complexity; badgeLbl = "Comp"; }
+        else if(sort === 'nom_desc') { badgeVal = file.metrics?.nom || 0; badgeLbl = "NOM"; }
+        else if(sort === 'noa_desc') { badgeVal = file.metrics?.noa || 0; badgeLbl = "NOA"; }
+        
+        item.innerHTML = `<span class="text-truncate" title="${file.file_path}">${fileName}</span> <span class="badge bg-secondary rounded-pill">${badgeLbl}: ${badgeVal}</span>`;
+        
+        item.addEventListener("click", () => renderFileDetails('A', file));
+        item.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          renderFileDetails('B', file);
+        });
+        listContainer.appendChild(item);
+      });
+    }
+
+    function renderFileDetails(slot, file) {
+      const fileName = file.file_path.split(/[\\/]/).pop();
+      document.getElementById(`file-${slot.toLowerCase()}-title`).textContent = fileName;
+      document.getElementById(`file-${slot.toLowerCase()}-title`).title = file.file_path;
+      document.getElementById(`file-${slot.toLowerCase()}-details`).innerHTML = `
+        <div class="small text-muted mb-2 text-break" title="Ruta completa">${file.file_path}</div>
+        <ul class="list-group list-group-flush mb-3">
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1">Líneas de Código (LOC) <span class="badge bg-primary rounded-pill">${file.loc}</span></li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1">Complejidad <span class="badge bg-danger rounded-pill">${file.complexity}</span></li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1">Métodos (NOM) <span class="badge bg-info rounded-pill">${file.metrics?.nom || 0}</span></li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1">Atributos (NOA) <span class="badge bg-warning rounded-pill">${file.metrics?.noa || 0}</span></li>
+        </ul>
+        <h6>Problemas de Código (${file.smells ? file.smells.length : 0})</h6>
+        <div style="max-height: 200px; overflow-y: auto; font-size: 0.85rem;" class="border rounded p-2 bg-light">
+          ${file.smells && file.smells.length > 0 ? file.smells.map(s => `<div class="mb-1 pb-1 border-bottom border-light">- ${s}</div>`).join('') : '<span class="text-success">No se detectaron problemas.</span>'}
+        </div>
+      `;
+    }
+
+    function clearFile(slot) {
+      document.getElementById(`file-${slot.toLowerCase()}-title`).textContent = `Archivo ${slot}`;
+      document.getElementById(`file-${slot.toLowerCase()}-title`).title = "";
+      document.getElementById(`file-${slot.toLowerCase()}-details`).innerHTML = `
+        <p class="text-muted">${slot === 'A' ? 'Selecciona un archivo de la lista para cargarlo aquí (Clic izquierdo).' : 'Haz clic derecho en un archivo de la lista para comparar aquí.'}</p>
+      `;
     }
 
     async function loadHistoryAndRender() {
@@ -595,6 +792,31 @@
         await loadHistoryAndRender();
       } catch (error) {
         showStatus(uploadStatus, error.message || "Error al subir el archivo.", "danger");
+      }
+    });
+
+    githubForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const repoUrl = githubUrlInput.value.trim();
+      if (!repoUrl) {
+        showStatus(uploadStatus, "Ingresa un URL de repositorio de GitHub.", "warning");
+        return;
+      }
+
+      if (!repoUrl.includes("github.com")) {
+        showStatus(uploadStatus, "Por favor ingresa un URL válido de GitHub (ej. https://github.com/user/repo)", "warning");
+        return;
+      }
+
+      try {
+        showStatus(uploadStatus, "Descargando y procesando repositorio... (esto puede tomar un tiempo)", "secondary");
+        await processGithubRepo(repoUrl);
+        showStatus(uploadStatus, "Repositorio analizado y guardado correctamente.", "success");
+        await loadHistoryAndRender();
+        githubForm.reset();
+      } catch (error) {
+        showStatus(uploadStatus, error.message || "Error al procesar el repositorio.", "danger");
       }
     });
 

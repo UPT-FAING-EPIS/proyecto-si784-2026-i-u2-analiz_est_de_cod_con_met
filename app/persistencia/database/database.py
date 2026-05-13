@@ -8,9 +8,9 @@ from app.persistencia.models.models import Base
 
 SQLALCHEMY_DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql+psycopg2://postgres:postgres@localhost:5432/analizador_codigo",
+    "sqlite:///./analizador_codigo.db",
 )
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
