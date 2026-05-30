@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 async def register(
     username: str = Form(...),
     password: str = Form(...),
+    role: str = Form("developer"),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Registra un nuevo usuario en el sistema.
@@ -36,7 +37,8 @@ async def register(
         )
 
     try:
-        user = repository.create_user(username=username, password=password, role="developer")
+        user = repository.create_user(username=username, password=password, role=role)
+        repository.log_action(user.id, "Registro de usuario")
         return {
             "id": user.id,
             "username": user.username,
@@ -76,8 +78,23 @@ async def login(
             detail="Credenciales incorrectas",
         )
 
+    repository.update_login_status(user.id, True)
+    repository.log_action(user.id, "Inicio de sesión")
+
     return {
         "id": user.id,
         "username": user.username,
         "role": user.role,
+        "is_logged_in": True,
     }
+
+
+@router.post("/logout")
+async def logout(
+    user_id: int = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    repository = UserRepository(db)
+    repository.update_login_status(user_id, False)
+    repository.log_action(user_id, "Cierre de sesión")
+    return {"message": "Sesión cerrada correctamente"}

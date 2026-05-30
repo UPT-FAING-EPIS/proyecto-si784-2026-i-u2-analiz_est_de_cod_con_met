@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.negocios.services.analysis_coordinator import AnalysisCoordinator
 from app.persistencia.database.dependencies import get_db
-from app.persistencia.repositories import AnalysisRepository
+from app.persistencia.repositories import AnalysisRepository, UserRepository
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -31,6 +31,7 @@ async def upload_code_analysis(
 
     # Instanciar repositorio y coordinador
     repository = AnalysisRepository(db)
+    user_repo = UserRepository(db)
     coordinator = AnalysisCoordinator(repository)
 
     # Procesar y guardar el análisis
@@ -47,7 +48,37 @@ async def upload_code_analysis(
         file_extension=file_extension,
     )
 
+    user_repo.log_action(user_id, f"Análisis de código subido: {project_name}")
+
     # Convertir el reporte a dict para la respuesta JSON
+    return {
+        "id": report.id,
+        "user_id": report.user_id,
+        "project_name": report.project_name,
+        "analysis_date": report.analysis_date.isoformat(),
+        "loc": report.loc,
+        "complexity": report.complexity,
+        "code_smells": report.code_smells,
+    }
+
+
+@router.post("/github")
+async def analyze_github_repo(
+    repo_url: str = Form(...),
+    user_id: int = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analiza un repositorio de GitHub y guarda el reporte en la BD."""
+    repository = AnalysisRepository(db)
+    user_repo = UserRepository(db)
+    coordinator = AnalysisCoordinator(repository)
+
+    report = coordinator.process_and_save_github_repo(
+        user_id=user_id,
+        repo_url=repo_url,
+    )
+    user_repo.log_action(user_id, f"Análisis de repositorio GitHub: {repo_url}")
+
     return {
         "id": report.id,
         "user_id": report.user_id,

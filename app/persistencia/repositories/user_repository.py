@@ -1,7 +1,7 @@
 import bcrypt
 from sqlalchemy.orm import Session
 
-from app.persistencia.models.models import User
+from app.persistencia.models.models import User, UserActionLog
 
 
 class UserRepository:
@@ -38,3 +38,20 @@ class UserRepository:
         Retorna el usuario si existe, de lo contrario None.
         """
         return self.db.query(User).filter(User.username == username).first()
+
+    def update_login_status(self, user_id: int, is_logged_in: bool) -> None:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.is_logged_in = is_logged_in
+            self.db.commit()
+
+    def log_action(self, user_id: int, action: str) -> None:
+        log = UserActionLog(user_id=user_id, action=action)
+        self.db.add(log)
+        self.db.commit()
+
+    def get_all_users(self) -> list[User]:
+        return self.db.query(User).all()
+
+    def get_user_actions(self, limit: int = 100) -> list[UserActionLog]:
+        return self.db.query(UserActionLog).order_by(UserActionLog.timestamp.desc()).limit(limit).all()
