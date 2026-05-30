@@ -15,12 +15,17 @@ from starlette.config import Config
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 config = Config(".env")
 oauth = OAuth(config)
 
 oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
     client_kwargs={
         'scope': 'openid email profile'
     }
@@ -31,8 +36,11 @@ oauth.register(
     access_token_url='https://github.com/login/oauth/access_token',
     authorize_url='https://github.com/login/oauth/authorize',
     api_base_url='https://api.github.com/',
+    client_id=os.environ.get("GITHUB_CLIENT_ID"),
+    client_secret=os.environ.get("GITHUB_CLIENT_SECRET"),
     client_kwargs={'scope': 'user:email'},
 )
+
 
 
 @router.post("/register")
