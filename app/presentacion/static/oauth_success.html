@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciando sesión...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #0b1f3a;
+            color: #ecfeff;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #22c55e;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader" style="margin: 0 auto 20px auto;"></div>
+        <h2>Autenticación exitosa</h2>
+        <p>Redirigiendo a tu panel...</p>
+    </div>
+
+    <script>
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+        const username = urlParams.get('username');
+        const role = urlParams.get('role');
+
+        if (userId && username && role) {
+            // Guardar en localStorage
+            localStorage.setItem("user_id", userId);
+            localStorage.setItem("username", username);
+            localStorage.setItem("user_role", role);
+
+            // Redirigir según rol
+            setTimeout(() => {
+                if (role === 'admin') {
+                    window.location.href = "/admin";
+                } else {
+                    window.location.href = "/dashboard";
+                }
+            }, 1500); // Pequeña pausa para mostrar el mensaje
+        } else {
+            document.querySelector('.container').innerHTML = '<h2>Error de autenticación</h2><p>No se recibieron los datos del usuario.</p><a href="/" style="color: #22c55e;">Volver al inicio</a>';
+        }
+    </script>
+</body>
+</html>

@@ -5,3 +5,7 @@ psycopg2-binary
 bcrypt
 javalang
 python-multipart
+authlib
+httpx
+itsdangerous
+python-dotenv
