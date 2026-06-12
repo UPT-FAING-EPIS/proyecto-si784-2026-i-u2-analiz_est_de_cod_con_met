@@ -216,111 +216,25 @@ Se implementó mediante un ciclo de vida ágil/iterativo para asegurar entregas 
 
 A continuación se presenta un cronograma estimado de las iteraciones de desarrollo del proyecto, dividido en semanas:
 
-Fase 
-
-Actividad Principal
-
-Duración Estimada
-
-Entregables
-
-Fase 1: Planificación y Diseño
-
-Levantamiento de Requerimientos \(SRS, VISION\)\. Diseño de interfaces \(Wireframes\)\. Definición de Arquitectura \(SAD\)\.
-
-Semana 1
-
-Documentos VISION, SRS, SAD\. Prototipos de UI\.
-
-Fase 2: Motor Core \(Backend\)
-
-Desarrollo del motor de análisis en Python\. Integración de ast para Python y javalang para Java\. Creación de Expresiones Regulares para C\#\.
-
-Semanas 2 y 3
-
-Módulo services\.py con analyze\_code\. Detección de Code Smells\.
-
-Fase 3: Desarrollo Web / API
-
-Creación de endpoints de subida \(/upload y /github\)\. Implementación de la capa de persistencia y modelos de BD\.
-
-Semana 4
-
-API funcional conectada a Base de Datos\. Funciones de guardado\.
-
-Fase 4: Frontend y Dashboard
-
-Maquetado HTML/CSS con Bootstrap\. Conexión de UI con API\. Integración de Chart\.js para histórico de evolución\.
-
-Semana 5
-
-Vistas de Subida, Dashboard Interactivo y Comparador de Archivos \(A vs B\)\.
-
-Fase 5: Pruebas y Cierre
-
-Pruebas unitarias de parsing, pruebas de carga de repositorios pesados en ZIP\. Generación del informe FD05\.
-
-Semana 6
-
-Aplicación estable, manuales y presentación final\.
+| Fase | Actividad Principal | Duración Estimada | Entregables |
+| :--- | :--- | :--- | :--- |
+| Fase 1: Planificación y Diseño | Levantamiento de Requerimientos (SRS, VISION). Diseño de interfaces (Wireframes). Definición de Arquitectura (SAD). | Semana 1 | Documentos VISION, SRS, SAD. Prototipos de UI. |
+| Fase 2: Motor Core (Backend) | Desarrollo del motor de análisis en Python. Integración de ast para Python y javalang para Java. Creación de Expresiones Regulares para C#. | Semanas 2 y 3 | Módulo services.py con analyze_code. Detección de Code Smells. |
+| Fase 3: Desarrollo Web / API | Creación de endpoints de subida (/upload y /github). Implementación de la capa de persistencia y modelos de BD. | Semana 4 | API funcional conectada a Base de Datos. Funciones de guardado. |
+| Fase 4: Frontend y Dashboard | Maquetado HTML/CSS con Bootstrap. Conexión de UI con API. Integración de Chart.js para histórico de evolución. | Semana 5 | Vistas de Subida, Dashboard Interactivo y Comparador de Archivos (A vs B). |
+| Fase 5: Pruebas y Cierre | Pruebas unitarias de parsing, pruebas de carga de repositorios pesados en ZIP. Generación del informe FD05. | Semana 6 | Aplicación estable, manuales y presentación final. |
 
 # <a id="_s1zk58pbw2st"></a>Presupuesto
 
 Dado que el proyecto fue desarrollado en un entorno académico, el costo principal recae en las horas\-hombre dedicadas a la investigación y codificación\. El uso de tecnologías de código abierto ha reducido los costos de licenciamiento a cero\. A continuación se presenta un presupuesto referencial \(estimado\) del proyecto:
 
-Categoría
-
-Descripción / Recurso
-
-Cantidad
-
-Costo Unitario Estimado \(S/\.\)
-
-Total \(S/\.\)
-
-__Software__
-
-Python, FastAPI, Bootstrap 5, Chart\.js, GitHub
-
-N/A \(Open Source\)
-
-S/\. 0\.00
-
-S/\. 0\.00
-
-__Hardware__
-
-Depreciación por uso de Laptops personales de desarrollo
-
-1 \- 2 equipos
-
-S/\. 150\.00 \(por mes\)
-
-S/\. 300\.00
-
-__Recursos Humanos__
-
-Rol: Desarrollador / Analista \(Horas invertidas estimadas\)
-
-80 horas
-
-S/\. 25\.00 / hora
-
-S/\.2,000\.00
-
-__Servicios__
-
-Internet y consumo eléctrico proporcional
-
-1\.5 meses
-
-S/\. 80\.00 / mes
-
-S/\. 120\.00
-
-__Total Estimado__
-
-__S/\.2,420\.00__
+| Categoría | Descripción / Recurso | Cantidad | Costo Unitario Estimado (S/.) | Total (S/.) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Software** | Python, FastAPI, Bootstrap 5, Chart.js, GitHub | N/A (Open Source) | S/. 0.00 | S/. 0.00 |
+| **Hardware** | Depreciación por uso de Laptops personales de desarrollo | 1 - 2 equipos | S/. 150.00 (por mes) | S/. 300.00 |
+| **Recursos Humanos** | Rol: Desarrollador / Analista (Horas invertidas estimadas) | 80 horas | S/. 25.00 / hora | S/. 2,000.00 |
+| **Servicios** | Internet y consumo eléctrico proporcional | 1.5 meses | S/. 80.00 / mes | S/. 120.00 |
+| | | | **Total Estimado** | **S/. 2,420.00** |
 
 # <a id="_wm7pb926mff5"></a>Conclusiones
 
