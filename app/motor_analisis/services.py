@@ -6,6 +6,7 @@ basadas en expresiones regulares.
 """
 from __future__ import annotations
 
+import ast
 import re
 from typing import Any, Dict, List
 
@@ -108,14 +109,58 @@ def analyze_code(code_string: str, extension: str) -> Dict[str, Any]:
             complexity += len(re.findall(rf"\b{re.escape(kw)}\b", lowered))
 
         if ext == ".py":
-            # NOM en Python: funciones y métodos por `def`
-            def_matches = re.findall(r"^\s*def\s+([A-Za-z_][\w]*)\s*\(", code_string, re.MULTILINE)
-            nom = len(def_matches)
-            method_count = nom
-            # NPM: no aplica en Python, estimamos funciones "públicas" (sin prefijo _)
-            npm = sum(1 for name in def_matches if not name.startswith("_"))
-            # NOA: atributos por asignaciones con `self.<attr> =`
-            noa = len(re.findall(r"\bself\.([A-Za-z_][\w]*)\s*=", code_string))
+            try:
+                tree = ast.parse(code_string)
+                nom_ast = 0
+                npm_ast = 0
+                noa_ast = 0
+                
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        nom_ast += 1
+                        if not node.name.startswith("_"):
+                            npm_ast += 1
+                        
+                        # Code Smell: Long Parameter List
+                        # Calculate total parameters
+                        num_params = len(node.args.args) + len(node.args.kwonlyargs)
+                        if hasattr(node.args, 'posonlyargs'):
+                            num_params += len(node.args.posonlyargs)
+                        if node.args.vararg: num_params += 1
+                        if node.args.kwarg: num_params += 1
+                        
+                        if num_params > 5:
+                            code_smells.append(f"Long Parameter List en método: {node.name}")
+                            
+                        # Code Smell: Long Method
+                        if hasattr(node, "end_lineno") and node.end_lineno is not None:
+                            method_loc = node.end_lineno - node.lineno + 1
+                            if method_loc > 50:
+                                code_smells.append(f"Long method: {node.name} ({method_loc} LOC)")
+                    
+                    elif isinstance(node, ast.Assign):
+                        for target in node.targets:
+                            if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
+                                noa_ast += 1
+                                
+                nom = nom_ast
+                method_count = nom
+                npm = npm_ast
+                noa = noa_ast
+            except SyntaxError:
+                # Fallback to simple regex if syntax error
+                def_matches = re.findall(r"^\s*def\s+([A-Za-z_][\w]*)\s*\(", code_string, re.MULTILINE)
+                nom = len(def_matches)
+                method_count = nom
+                npm = sum(1 for name in def_matches if not name.startswith("_"))
+                noa = len(re.findall(r"\bself\.([A-Za-z_][\w]*)\s*=", code_string))
+                
+                for m in re.finditer(r"^\s*def\s+(?P<name>[A-Za-z_][\w]*)\s*\((?P<params>[^)]*)\):", code_string, re.MULTILINE):
+                    name = m.group("name")
+                    params_list = [p for p in m.group("params").split(",") if p.strip() and p.strip() != "self"]
+                    if len(params_list) > 5:
+                        code_smells.append(f"Long Parameter List en método: {name}")
+
             # CLOC: `#` por línea + docstrings multilinea
             cloc += sum(1 for line in code_string.splitlines() if re.search(r"(^|\s)#", line))
             for match in re.findall(r'""".*?"""|\'\'\'.*?\'\'\'', code_string, re.DOTALL):
@@ -136,6 +181,38 @@ def analyze_code(code_string: str, extension: str) -> Dict[str, Any]:
                 re.MULTILINE,
             )
             noa = len(field_matches)
+            
+            # Detect smells in C#
+            cs_method_pattern = re.compile(
+                r'(?:(?:public|protected|private|internal|static|virtual|override|sealed|async|new|readonly)\s+)*'
+                r'(?:[\w\<\>\[\]\?]+\s+)?'
+                r'(?P<name>[A-Za-z_][\w]*)\s*\((?P<params>[^)]*)\)\s*\{',
+                re.MULTILINE,
+            )
+            for m in cs_method_pattern.finditer(code_string):
+                name = m.group("name")
+                params_str = m.group("params")
+                params_list = [p for p in params_str.split(",") if p.strip()]
+                if len(params_list) > 5:
+                    code_smells.append(f"Long Parameter List en método: {name}")
+
+                idx = m.end() - 1
+                brace_count = 1
+                i = idx + 1
+                length = len(code_string)
+                while i < length and brace_count > 0:
+                    ch = code_string[i]
+                    if ch == "{":
+                        brace_count += 1
+                    elif ch == "}":
+                        brace_count -= 1
+                    i += 1
+
+                method_body = code_string[idx:i]
+                method_loc = sum(1 for line in method_body.splitlines() if line.strip())
+                if method_loc > 50:
+                    code_smells.append(f"Long method: {name} ({method_loc} LOC)")
+            
             # CLOC estilo C/C#
             for match in re.findall(r"/\*.*?\*/", code_string, re.DOTALL):
                 cloc += match.count("\n") + 1
