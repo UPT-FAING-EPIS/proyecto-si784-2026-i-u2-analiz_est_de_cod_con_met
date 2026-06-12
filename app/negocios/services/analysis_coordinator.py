@@ -90,7 +90,7 @@ class AnalysisCoordinator:
             for root, _, files in os.walk(temp_dir):
                 for file in files:
                     ext = os.path.splitext(file)[1].lower()
-                    if ext in [".java", ".cs", ".py"]:
+                    if ext in [".java", ".cs", ".py", ".php", ".js", ".ts", ".jsx", ".tsx", ".c", ".cpp", ".h", ".go", ".rb", ".rs"]:
                         file_path = os.path.join(root, file)
                         try:
                             with open(file_path, "r", encoding="utf-8") as f:

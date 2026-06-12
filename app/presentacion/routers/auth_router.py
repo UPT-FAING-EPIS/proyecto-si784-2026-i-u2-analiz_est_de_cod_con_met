@@ -136,7 +136,9 @@ async def logout(
 async def login_google(request: Request):
     """Redirige al usuario al inicio de sesión con Google."""
     redirect_uri = request.url_for('callback_google')
-    return await oauth.google.authorize_redirect(request, str(redirect_uri), prompt='select_account')
+    response = await oauth.google.authorize_redirect(request, str(redirect_uri), prompt='select_account')
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    return response
 
 
 @router.get("/callback/google")
@@ -169,7 +171,9 @@ async def callback_google(request: Request, db: Session = Depends(get_db)):
 async def login_github(request: Request):
     """Redirige al usuario al inicio de sesión con GitHub."""
     redirect_uri = request.url_for('callback_github')
-    return await oauth.github.authorize_redirect(request, str(redirect_uri), prompt='consent')
+    response = await oauth.github.authorize_redirect(request, str(redirect_uri), prompt='consent')
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    return response
 
 
 @router.get("/callback/github")
