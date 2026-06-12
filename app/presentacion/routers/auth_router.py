@@ -191,9 +191,14 @@ async def callback_github(request: Request, db: Session = Depends(get_db)):
             repository.log_action(user.id, "Registro de usuario via GitHub")
         
         repository.update_login_status(user.id, True)
+        
+        access_token = token.get('access_token')
+        if access_token:
+            repository.update_github_token(user.id, access_token)
+            
         repository.log_action(user.id, "Inicio de sesión via GitHub")
         
-        return RedirectResponse(url=f"/static/oauth_success.html?id={user.id}&username={user.username}&role={user.role}")
+        return RedirectResponse(url=f"/static/oauth_success.html?id={user.id}&username={user.username}&role={user.role}&provider=github")
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"GitHub OAuth error: {str(e)}")

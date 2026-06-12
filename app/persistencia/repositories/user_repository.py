@@ -45,6 +45,13 @@ class UserRepository:
             user.is_logged_in = is_logged_in
             self.db.commit()
 
+    def update_github_token(self, user_id: int, token: str) -> None:
+        """Actualiza el token de acceso de GitHub de un usuario."""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.github_token = token
+            self.db.commit()
+
     def log_action(self, user_id: int, action: str) -> None:
         log = UserActionLog(user_id=user_id, action=action)
         self.db.add(log)

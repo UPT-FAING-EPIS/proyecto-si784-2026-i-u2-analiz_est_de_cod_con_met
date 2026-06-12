@@ -180,11 +180,16 @@
         <div class="tab-pane fade" id="pills-github" role="tabpanel" aria-labelledby="pills-github-tab">
           <form id="github-form" class="row g-3" novalidate>
             <div class="col-md-9">
-              <label for="github-url" class="form-label">URL del Repositorio de GitHub</label>
-              <input id="github-url" name="repo_url" class="form-control" type="url" placeholder="https://github.com/usuario/repositorio" required />
-              <div class="form-text">Se enviará a /api/analysis/github para descargar y analizar todo el código fuente del proyecto.</div>
+              <label for="github-url" class="form-label">Repositorio de GitHub</label>
+              <div class="d-flex flex-column gap-2 mb-1">
+                <select id="github-repo-select" class="form-select d-none">
+                  <option value="">Cargando repositorios...</option>
+                </select>
+                <input id="github-url" name="repo_url" class="form-control" type="url" placeholder="https://github.com/usuario/repositorio" required />
+              </div>
+              <div class="form-text" id="github-form-text">Se enviará a /api/analysis/github para descargar y analizar todo el código fuente del proyecto.</div>
             </div>
-            <div class="col-md-3 d-flex flex-column justify-content-end">
+            <div class="col-md-3 d-flex flex-column justify-content-center pb-4">
               <button id="github-button" class="btn btn-primary w-100" type="submit">Analizar Repositorio</button>
             </div>
           </form>
@@ -372,11 +377,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
     const userId = localStorage.getItem("user_id");
-    if (!userId) {
+    if (!userId || userId === "null" || userId === "undefined") {
+      localStorage.clear();
       window.location.href = "/";
+      throw new Error("Sesión inválida, redirigiendo...");
     }
 
     const userRole = localStorage.getItem("user_role");
+    const authProvider = localStorage.getItem("auth_provider");
     
     document.getElementById("current-user").textContent = localStorage.getItem("username") || userId || "-";
 
@@ -387,6 +395,7 @@
     const uploadForm = document.getElementById("upload-form");
     const githubForm = document.getElementById("github-form");
     const githubUrlInput = document.getElementById("github-url");
+    const githubRepoSelect = document.getElementById("github-repo-select");
     const codeFileInput = document.getElementById("code-file");
     const uploadStatus = document.getElementById("upload-status");
     const historyStatus = document.getElementById("history-status");
@@ -842,10 +851,7 @@
       showStatus(historyStatus, "CSV exportado correctamente.", "success");
     });
 
-    logoutButton.addEventListener("click", () => {
-      localStorage.removeItem("user_id");
-      window.location.href = "/";
-    });
+    // Duplicate logout listener removed
 
     function initBootstrapTooltips() {
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -856,6 +862,35 @@
 
     initBootstrapTooltips();
     loadHistoryAndRender();
+
+    if (authProvider === "github") {
+      githubRepoSelect.classList.remove("d-none");
+      
+      fetch(`/api/analysis/github/repos/${userId}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Error fetching repos");
+            return res.json();
+        })
+        .then(repos => {
+            githubRepoSelect.innerHTML = '<option value="">-- Selecciona de tus repositorios o escribe abajo --</option>';
+            repos.forEach(repo => {
+                const option = document.createElement("option");
+                option.value = repo.clone_url;
+                option.textContent = repo.full_name;
+                githubRepoSelect.appendChild(option);
+            });
+            githubRepoSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    githubUrlInput.value = e.target.value;
+                }
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            githubRepoSelect.classList.add("d-none");
+        });
+    }
+
     logoutButton.addEventListener("click", async () => {
       try {
         const formData = new FormData();
@@ -870,6 +905,7 @@
         localStorage.removeItem("user_id");
         localStorage.removeItem("user_role");
         localStorage.removeItem("username");
+        localStorage.removeItem("auth_provider");
         window.location.href = "/";
       }
     });
