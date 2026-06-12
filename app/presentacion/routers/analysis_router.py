@@ -92,6 +92,35 @@ async def analyze_github_repo(
     }
 
 
+@router.post("/external/github")
+async def analyze_external_github_repo(
+    repo_url: str = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analiza un repositorio de GitHub de forma externa sin guardar estado.
+    Perfecto para integraciones con otros microservicios (como el Analizador de Vulnerabilidades).
+    """
+    user_repo = UserRepository(db)
+    
+    # Registrar la acción bajo un usuario especial "API_Externa" para que salga en el panel Admin
+    ext_user = user_repo.get_user_by_username("API_Externa")
+    if not ext_user:
+        ext_user = user_repo.create_user(username="API_Externa", password="no_login_allowed", role="system")
+        
+    user_repo.log_action(ext_user.id, f"Análisis externo consumido para: {repo_url}")
+
+    coordinator = AnalysisCoordinator(None)
+    report_dict = coordinator.process_github_repo_stateless(repo_url=repo_url)
+    
+    return {
+        "status": "success",
+        "project_name": report_dict["project_name"],
+        "loc": report_dict["loc"],
+        "complexity": report_dict["complexity"],
+        "code_smells": report_dict["code_smells"],
+    }
+
+
 @router.get("/history/{user_id}")
 async def get_analysis_history(
     user_id: int,

@@ -53,12 +53,8 @@ class AnalysisCoordinator:
 
         return report
 
-    def process_and_save_github_repo(
-        self,
-        user_id: int,
-        repo_url: str,
-    ) -> AnalysisReport:
-        """Descarga un repositorio, lo analiza y guarda el reporte consolidado."""
+    def _analyze_github_repo_core(self, repo_url: str) -> dict[str, Any]:
+        """Descarga y analiza un repositorio de GitHub, devolviendo el diccionario con los resultados brutos."""
         parts = repo_url.rstrip("/").split("/")
         if len(parts) < 2:
             raise ValueError("URL de repositorio inválida")
@@ -137,12 +133,29 @@ class AnalysisCoordinator:
             "files": files_data,
         }
 
+        return {
+            "project_name": f"{owner}/{repo}",
+            "loc": loc,
+            "complexity": complexity,
+            "code_smells": code_smells_payload,
+        }
+
+    def process_and_save_github_repo(
+        self,
+        user_id: int,
+        repo_url: str,
+    ) -> AnalysisReport:
+        """Descarga un repositorio, lo analiza y guarda el reporte consolidado."""
+        data = self._analyze_github_repo_core(repo_url)
         report = self.repository.create_report(
             user_id=user_id,
-            project_name=f"{owner}/{repo}",
-            loc=loc,
-            complexity=complexity,
-            code_smells=code_smells_payload,
+            project_name=data["project_name"],
+            loc=data["loc"],
+            complexity=data["complexity"],
+            code_smells=data["code_smells"],
         )
-
         return report
+
+    def process_github_repo_stateless(self, repo_url: str) -> dict[str, Any]:
+        """Descarga un repositorio, lo analiza y devuelve el reporte sin guardar en BD."""
+        return self._analyze_github_repo_core(repo_url)
