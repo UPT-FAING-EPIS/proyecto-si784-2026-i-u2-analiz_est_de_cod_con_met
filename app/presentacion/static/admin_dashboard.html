@@ -91,6 +91,29 @@
             <h2 class="h5 mb-0">Estado de Usuarios</h2>
             <button id="refresh-users" class="btn btn-outline-secondary btn-sm" type="button">Actualizar</button>
           </div>
+
+          <!-- Filtros de Usuarios -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <input type="text" id="users-search" class="form-control form-control-sm" placeholder="Buscar por usuario...">
+            </div>
+            <div class="col-md-4">
+              <select id="users-role-filter" class="form-select form-select-sm">
+                <option value="all">Todos los Roles</option>
+                <option value="admin">Admin</option>
+                <option value="developer">Developer</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select id="users-status-filter" class="form-select form-select-sm">
+                <option value="all">Cualquier Sesión</option>
+                <option value="logged_in">Logeado</option>
+                <option value="logged_out">Desconectado</option>
+              </select>
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead class="table-light">
@@ -115,6 +138,17 @@
             <h2 class="h5 mb-0">Auditoría de Acciones</h2>
             <button id="refresh-actions" class="btn btn-outline-secondary btn-sm" type="button">Actualizar</button>
           </div>
+
+          <!-- Filtros de Acciones -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <input type="text" id="actions-user-search" class="form-control form-control-sm" placeholder="Buscar por usuario (ej. admin)...">
+            </div>
+            <div class="col-md-6">
+              <input type="text" id="actions-text-search" class="form-control form-control-sm" placeholder="Buscar por acción (ej. Inicio de sesión)...">
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead class="table-light">
@@ -176,36 +210,87 @@
       }
     });
 
+    let allUsers = [];
+    let allActions = [];
+
+    function renderUsers() {
+      const tbody = document.getElementById("users-tbody");
+      const search = document.getElementById("users-search").value.toLowerCase();
+      const roleFilter = document.getElementById("users-role-filter").value;
+      const statusFilter = document.getElementById("users-status-filter").value;
+
+      let filtered = allUsers.filter(u => {
+        const matchSearch = u.username.toLowerCase().includes(search);
+        const matchRole = roleFilter === "all" || u.role === roleFilter;
+        const matchStatus = statusFilter === "all" || 
+                           (statusFilter === "logged_in" && u.is_logged_in) || 
+                           (statusFilter === "logged_out" && !u.is_logged_in);
+        return matchSearch && matchRole && matchStatus;
+      });
+
+      // Ordenar explícitamente por ID para evitar que cambien de posición
+      filtered.sort((a, b) => a.id - b.id);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron usuarios que coincidan con los filtros.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td><strong>${u.username}</strong></td>
+          <td><span class="badge bg-secondary status-badge">${u.role}</span></td>
+          <td>
+            ${u.active_status 
+              ? '<span class="badge bg-success status-badge">Activo</span>' 
+              : '<span class="badge bg-danger status-badge">Inactivo</span>'}
+          </td>
+          <td>
+            ${u.is_logged_in 
+              ? '<span class="badge bg-primary status-badge">Logeado</span>' 
+              : '<span class="badge bg-light text-dark border status-badge">Desconectado</span>'}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderActions() {
+      const tbody = document.getElementById("actions-tbody");
+      const userSearch = document.getElementById("actions-user-search").value.toLowerCase();
+      const textSearch = document.getElementById("actions-text-search").value.toLowerCase();
+
+      let filtered = allActions.filter(a => {
+        const matchUser = a.username.toLowerCase().includes(userSearch) || a.user_id.toString().includes(userSearch);
+        const matchText = a.action.toLowerCase().includes(textSearch);
+        return matchUser && matchText;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se encontraron acciones.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(a => {
+        const d = new Date(a.timestamp);
+        return `
+        <tr>
+          <td>${a.id}</td>
+          <td>${d.toLocaleDateString()} ${d.toLocaleTimeString()}</td>
+          <td><span class="fw-medium">${a.username}</span> <small class="text-muted">(ID: ${a.user_id})</small></td>
+          <td>${a.action}</td>
+        </tr>
+      `}).join("");
+    }
+
     async function loadUsers() {
       const tbody = document.getElementById("users-tbody");
       tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cargando usuarios...</td></tr>';
       try {
         const response = await fetch("/api/admin/users");
         if (!response.ok) throw new Error("Error al obtener usuarios");
-        const users = await response.json();
-        
-        if (users.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron usuarios.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = users.map(u => `
-          <tr>
-            <td>${u.id}</td>
-            <td><strong>${u.username}</strong></td>
-            <td><span class="badge bg-secondary status-badge">${u.role}</span></td>
-            <td>
-              ${u.active_status 
-                ? '<span class="badge bg-success status-badge">Activo</span>' 
-                : '<span class="badge bg-danger status-badge">Inactivo</span>'}
-            </td>
-            <td>
-              ${u.is_logged_in 
-                ? '<span class="badge bg-primary status-badge">Logeado</span>' 
-                : '<span class="badge bg-light text-dark border status-badge">Desconectado</span>'}
-            </td>
-          </tr>
-        `).join("");
+        allUsers = await response.json();
+        renderUsers();
       } catch (error) {
         console.error(error);
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar usuarios.</td></tr>';
@@ -218,23 +303,8 @@
       try {
         const response = await fetch("/api/admin/actions");
         if (!response.ok) throw new Error("Error al obtener acciones");
-        const actions = await response.json();
-        
-        if (actions.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se encontraron acciones recientes.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = actions.map(a => {
-          const d = new Date(a.timestamp);
-          return `
-          <tr>
-            <td>${a.id}</td>
-            <td>${d.toLocaleDateString()} ${d.toLocaleTimeString()}</td>
-            <td><span class="fw-medium">${a.username}</span> <small class="text-muted">(ID: ${a.user_id})</small></td>
-            <td>${a.action}</td>
-          </tr>
-        `}).join("");
+        allActions = await response.json();
+        renderActions();
       } catch (error) {
         console.error(error);
         tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar acciones.</td></tr>';
@@ -243,6 +313,13 @@
 
     document.getElementById("refresh-users").addEventListener("click", loadUsers);
     document.getElementById("refresh-actions").addEventListener("click", loadActions);
+
+    document.getElementById("users-search").addEventListener("input", renderUsers);
+    document.getElementById("users-role-filter").addEventListener("change", renderUsers);
+    document.getElementById("users-status-filter").addEventListener("change", renderUsers);
+
+    document.getElementById("actions-user-search").addEventListener("input", renderActions);
+    document.getElementById("actions-text-search").addEventListener("input", renderActions);
 
     // Cargar datos al iniciar
     loadUsers();
