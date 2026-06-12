@@ -324,6 +324,20 @@
     // Cargar datos al iniciar
     loadUsers();
     loadActions();
+
+    // Configurar actualización automática cada 5 segundos (5000 ms)
+    setInterval(() => {
+      // Se llaman silenciosamente para no interrumpir si el usuario está leyendo
+      fetch("/api/admin/users").then(res => res.json()).then(data => {
+        allUsers = data;
+        renderUsers();
+      }).catch(console.error);
+
+      fetch("/api/admin/actions").then(res => res.json()).then(data => {
+        allActions = data;
+        renderActions();
+      }).catch(console.error);
+    }, 5000);
   </script>
 </body>
 </html>
