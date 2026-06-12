@@ -150,10 +150,10 @@
     }
     
     // Si necesitas validar estrictamente que sea admin, podrías descomentar esto:
-    /*if (userRole !== "admin") {
+    if (userRole !== "system" && userRole !== "admin") {
       alert("Acceso denegado. Se requiere rol de administrador.");
       window.location.href = "/dashboard";
-    }*/
+    }
 
     document.getElementById("current-user").textContent = localStorage.getItem("username") || userId;
 
