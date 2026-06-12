@@ -186,11 +186,14 @@ def analyze_code(code_string: str, extension: str) -> Dict[str, Any]:
             cs_method_pattern = re.compile(
                 r'(?:(?:public|protected|private|internal|static|virtual|override|sealed|async|new|readonly)\s+)*'
                 r'(?:[\w\<\>\[\]\?]+\s+)?'
-                r'(?P<name>[A-Za-z_][\w]*)\s*\((?P<params>[^)]*)\)\s*\{',
+                r'(?P<name>[A-Za-z_][\w]*)\s*\((?P<params>[^)]*)\)[^{;]*\{',
                 re.MULTILINE,
             )
             for m in cs_method_pattern.finditer(code_string):
                 name = m.group("name")
+                if name in ["if", "for", "while", "catch", "switch", "using", "lock", "foreach"]:
+                    continue
+                    
                 params_str = m.group("params")
                 params_list = [p for p in params_str.split(",") if p.strip()]
                 if len(params_list) > 5:
