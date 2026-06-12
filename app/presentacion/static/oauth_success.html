@@ -46,12 +46,16 @@
         const userId = urlParams.get('id');
         const username = urlParams.get('username');
         const role = urlParams.get('role');
+        const provider = urlParams.get('provider');
 
         if (userId && username && role) {
             // Guardar en localStorage
             localStorage.setItem("user_id", userId);
             localStorage.setItem("username", username);
             localStorage.setItem("user_role", role);
+            if (provider) {
+                localStorage.setItem("auth_provider", provider);
+            }
 
             // Redirigir según rol
             setTimeout(() => {

@@ -1,12 +1,14 @@
 import os
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
 from sqlalchemy.orm import Session
+import requests
 
 from app.negocios.services.analysis_coordinator import AnalysisCoordinator
 from app.persistencia.database.dependencies import get_db
 from app.persistencia.repositories import AnalysisRepository, UserRepository
+from app.persistencia.models.models import User
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -111,3 +113,21 @@ async def get_analysis_history(
         }
         for report in reports
     ]
+
+@router.get("/github/repos/{user_id}")
+async def get_github_repos(
+    user_id: int,
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Obtiene la lista de repositorios de GitHub del usuario."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or not user.github_token:
+        raise HTTPException(status_code=400, detail="Usuario no encontrado o no ha iniciado sesión con GitHub.")
+    
+    headers = {"Authorization": f"token {user.github_token}"}
+    response = requests.get("https://api.github.com/user/repos?per_page=100", headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="Error fetching repositories from GitHub")
+    
+    repos = response.json()
+    return [{"name": repo["name"], "full_name": repo["full_name"], "url": repo["html_url"], "clone_url": repo["clone_url"]} for repo in repos]
