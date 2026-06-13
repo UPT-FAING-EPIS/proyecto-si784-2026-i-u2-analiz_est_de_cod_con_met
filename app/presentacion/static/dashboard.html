@@ -88,6 +88,9 @@
           <button class="nav-link active" id="pills-file-tab" data-bs-toggle="pill" data-bs-target="#pills-file" type="button" role="tab" aria-controls="pills-file" aria-selected="true">Archivo Local</button>
         </li>
         <li class="nav-item" role="presentation">
+          <button class="nav-link" id="pills-folder-tab" data-bs-toggle="pill" data-bs-target="#pills-folder" type="button" role="tab" aria-controls="pills-folder" aria-selected="false">Carpeta Local</button>
+        </li>
+        <li class="nav-item" role="presentation">
           <button class="nav-link" id="pills-github-tab" data-bs-toggle="pill" data-bs-target="#pills-github" type="button" role="tab" aria-controls="pills-github" aria-selected="false">Repositorio GitHub</button>
         </li>
       </ul>
@@ -174,6 +177,25 @@
                   </li>
                 </ul>
               </div>
+            </div>
+          </form>
+        </div>
+        <div class="tab-pane fade" id="pills-folder" role="tabpanel" aria-labelledby="pills-folder-tab">
+          <form id="folder-form" class="row g-3" novalidate>
+            <div class="col-md-9">
+              <label for="code-folder" class="form-label">Seleccionar Carpeta</label>
+              <input
+                id="code-folder"
+                name="files"
+                class="form-control"
+                type="file"
+                webkitdirectory directory multiple
+                required
+              />
+              <div class="form-text">Se analizarán y sumarán todos los archivos soportados dentro de la carpeta.</div>
+            </div>
+            <div class="col-md-3 d-flex flex-column justify-content-end pb-3">
+              <button id="folder-button" class="btn btn-primary w-100" type="submit">Analizar Carpeta</button>
             </div>
           </form>
         </div>
@@ -393,10 +415,12 @@
     }
 
     const uploadForm = document.getElementById("upload-form");
+    const folderForm = document.getElementById("folder-form");
     const githubForm = document.getElementById("github-form");
     const githubUrlInput = document.getElementById("github-url");
     const githubRepoSelect = document.getElementById("github-repo-select");
     const codeFileInput = document.getElementById("code-file");
+    const folderInput = document.getElementById("code-folder");
     const uploadStatus = document.getElementById("upload-status");
     const historyStatus = document.getElementById("history-status");
     const refreshBtn = document.getElementById("refresh-history");
@@ -428,6 +452,49 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.detail || "No se pudo procesar el archivo.");
+      }
+
+      return data;
+    }
+
+    async function uploadFolder(filesArray) {
+      const formData = new FormData();
+      let hasValidFile = false;
+      const allowedExtensions = [".java", ".cs", ".py", ".php", ".js", ".ts", ".jsx", ".tsx", ".c", ".cpp", ".h", ".go", ".rb", ".rs"];
+
+      for (let file of filesArray) {
+          const fileName = file.name.toLowerCase();
+          if (allowedExtensions.some(ext => fileName.endsWith(ext))) {
+              // file.webkitRelativePath contiene la ruta completa del navegador
+              formData.append("files", file, file.webkitRelativePath || file.name);
+              hasValidFile = true;
+          }
+      }
+
+      if (!hasValidFile) {
+          throw new Error("No se encontraron archivos de código soportados en la carpeta.");
+      }
+
+      formData.append("user_id", userId);
+      
+      let projName = "Carpeta Local";
+      for (let f of formData.getAll("files")) {
+          const pathParts = f.name.split('/');
+          if (pathParts.length > 1) {
+              projName = pathParts[0];
+              break;
+          }
+      }
+      formData.append("project_name", projName);
+
+      const response = await fetch("/api/analysis/upload_folder", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || "No se pudo procesar la carpeta.");
       }
 
       return data;
@@ -802,12 +869,49 @@
       }
 
       try {
-        showStatus(uploadStatus, "Procesando análisis...", "secondary");
+        clearStatus(uploadStatus);
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...';
+
         await uploadCodeFile(selectedFile);
-        showStatus(uploadStatus, "Análisis guardado correctamente.", "success");
-        await loadHistoryAndRender();
+        showStatus(uploadStatus, "¡Análisis del archivo completado con éxito!", "success");
+        loadHistoryAndRender();
+        event.target.reset();
       } catch (error) {
-        showStatus(uploadStatus, error.message || "Error al subir el archivo.", "danger");
+        showStatus(uploadStatus, error.message, "danger");
+      } finally {
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Analizar y Guardar";
+      }
+    });
+
+    folderForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      
+      if (!folderInput.files || folderInput.files.length === 0) {
+        showStatus(uploadStatus, "Selecciona una carpeta para continuar.", "warning");
+        return;
+      }
+      
+      try {
+        clearStatus(uploadStatus);
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Subiendo y analizando...';
+
+        await uploadFolder(folderInput.files);
+        
+        showStatus(uploadStatus, "Carpeta analizada con éxito.", "success");
+        loadHistoryAndRender();
+        event.target.reset();
+      } catch (error) {
+        showStatus(uploadStatus, error.message, "danger");
+      } finally {
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Analizar Carpeta";
       }
     });
 
