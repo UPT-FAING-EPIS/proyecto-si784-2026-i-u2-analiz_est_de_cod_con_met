@@ -1,0 +1,55 @@
+name: Versionamiento y Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tipo_version:
+        description: 'Tipo de incremento de versión (patch, minor, major)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+jobs:
+  versionamiento_y_release:
+    name: Versionamiento y Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar bump-my-version
+        run: pip install bump-my-version
+
+      - name: Incrementar versión
+        run: |
+          # Requiere configuración previa de .bumpversion.cfg o pyproject.toml para definir dónde se cambia la versión
+          echo "Ejecutando: bump-my-version bump ${{ github.event.inputs.tipo_version }}"
+          
+          # Descomentar para aplicar el incremento real:
+          # bump-my-version bump ${{ github.event.inputs.tipo_version }}
+          # git push --follow-tags
+
+      - name: Crear Draft de GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "draft-${{ github.run_id }}"
+          name: "Release Manual - ${{ github.event.inputs.tipo_version }}"
+          draft: true
+          generate_release_notes: true

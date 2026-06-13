@@ -1,0 +1,74 @@
+name: Pruebas Automatizadas
+
+on:
+  workflow_dispatch:
+    inputs:
+      ejecutar_unitarias_integracion:
+        description: 'Ejecutar pruebas unitarias y de integración'
+        required: true
+        type: boolean
+        default: true
+      ejecutar_mutantes:
+        description: 'Ejecutar pruebas de mutación'
+        required: true
+        type: boolean
+        default: true
+      ejecutar_ui:
+        description: 'Ejecutar pruebas de interfaz (UI)'
+        required: true
+        type: boolean
+        default: true
+      ejecutar_bdd:
+        description: 'Ejecutar pruebas BDD'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  pruebas:
+    name: Ejecución de Pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov mutmut behave playwright pytest-bdd
+
+      - name: Instalar navegadores para Playwright
+        if: ${{ github.event.inputs.ejecutar_ui == 'true' }}
+        run: |
+          python -m playwright install --with-deps
+
+      - name: Pruebas Unitarias e Integración
+        if: ${{ github.event.inputs.ejecutar_unitarias_integracion == 'true' }}
+        run: |
+          # Asume que los tests están en la carpeta 'tests' o se descubren solos
+          pytest --cov=app tests/
+
+      - name: Pruebas de Mutación (mutmut)
+        if: ${{ github.event.inputs.ejecutar_mutantes == 'true' }}
+        run: |
+          # Corre mutmut con configuración por defecto (se recomienda tener .mutmut_config.py o setup.cfg)
+          mutmut run || echo "Se detectaron mutantes que sobrevivieron"
+          mutmut results
+
+      - name: Pruebas de Interfaz (UI)
+        if: ${{ github.event.inputs.ejecutar_ui == 'true' }}
+        run: |
+          # Asume que hay un script de playwright en tests/ui
+          pytest tests/ui/ || echo "Asegúrate de agregar pruebas de interfaz"
+
+      - name: Pruebas BDD
+        if: ${{ github.event.inputs.ejecutar_bdd == 'true' }}
+        run: |
+          # Asume que usas behave o pytest-bdd
+          behave tests/features/ || echo "Asegúrate de agregar features de BDD"

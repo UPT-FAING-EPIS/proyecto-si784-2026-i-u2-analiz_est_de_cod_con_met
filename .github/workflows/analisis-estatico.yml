@@ -1,0 +1,67 @@
+name: Análisis Estático de Código
+
+on:
+  workflow_dispatch:
+    inputs:
+      ejecutar_sonar:
+        description: 'Ejecutar análisis con SonarCloud'
+        required: true
+        type: boolean
+        default: true
+      ejecutar_semgrep:
+        description: 'Ejecutar análisis con Semgrep'
+        required: true
+        type: boolean
+        default: true
+      ejecutar_snyk:
+        description: 'Ejecutar análisis con Snyk'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.ejecutar_sonar == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Nota: Asegúrate de crear un archivo sonar-project.properties en la raíz del proyecto para la configuración de Sonar
+
+  semgrep:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.ejecutar_semgrep == 'true' }}
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config auto
+
+  snyk:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.ejecutar_snyk == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
