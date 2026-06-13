@@ -159,3 +159,63 @@ class AnalysisCoordinator:
     def process_github_repo_stateless(self, repo_url: str) -> dict[str, Any]:
         """Descarga un repositorio, lo analiza y devuelve el reporte sin guardar en BD."""
         return self._analyze_github_repo_core(repo_url)
+
+    def process_and_save_folder(
+        self,
+        user_id: int,
+        project_name: str,
+        files_data: list[tuple[str, str, str]],
+    ) -> AnalysisReport:
+        """Analiza múltiples archivos de una carpeta subida y guarda el reporte consolidado."""
+        loc = 0
+        complexity = 0
+        nom = 0
+        npm = 0
+        noa = 0
+        cloc = 0
+        code_smells = []
+        files_results = []
+
+        for rel_path, code_string, ext in files_data:
+            analysis = analyze_code(code_string, extension=ext)
+            
+            file_loc = int(analysis.get("loc", 0))
+            file_complexity = int(analysis.get("complexity", 0))
+            file_nom = int(analysis.get("nom", 0))
+            file_npm = int(analysis.get("npm", 0))
+            file_noa = int(analysis.get("noa", 0))
+            file_cloc = int(analysis.get("cloc", 0))
+            file_smells = analysis.get("code_smells", [])
+
+            loc += file_loc
+            complexity += file_complexity
+            nom += file_nom
+            npm += file_npm
+            noa += file_noa
+            cloc += file_cloc
+            
+            files_results.append({
+                "file_path": rel_path,
+                "loc": file_loc,
+                "complexity": file_complexity,
+                "metrics": {"nom": file_nom, "npm": file_npm, "noa": file_noa, "cloc": file_cloc},
+                "smells": file_smells
+            })
+            
+            for smell in file_smells:
+                code_smells.append(f"[{rel_path}] {smell}")
+
+        code_smells_payload: Dict[str, Any] = {
+            "smells": code_smells,
+            "metrics": {"nom": nom, "npm": npm, "noa": noa, "cloc": cloc},
+            "files": files_results,
+        }
+
+        report = self.repository.create_report(
+            user_id=user_id,
+            project_name=project_name,
+            loc=loc,
+            complexity=complexity,
+            code_smells=code_smells_payload,
+        )
+        return report

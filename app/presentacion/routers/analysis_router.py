@@ -121,6 +121,53 @@ async def analyze_external_github_repo(
     }
 
 
+@router.post("/upload_folder")
+async def upload_folder_analysis(
+    files: list[UploadFile] = File(...),
+    user_id: int = Form(...),
+    project_name: str = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analiza múltiples archivos de una carpeta local subida."""
+    repository = AnalysisRepository(db)
+    user_repo = UserRepository(db)
+    coordinator = AnalysisCoordinator(repository)
+
+    files_data = []
+    for file in files:
+        content = await file.read()
+        try:
+            code_string = content.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        
+        filename = file.filename or "unknown"
+        ext = os.path.splitext(filename)[1].lower()
+        
+        # Filtramos internamente extensiones válidas por si acaso
+        if ext in [".java", ".cs", ".py", ".php", ".js", ".ts", ".jsx", ".tsx", ".c", ".cpp", ".h", ".go", ".rb", ".rs"]:
+            files_data.append((filename, code_string, ext))
+
+    report = coordinator.process_and_save_folder(
+        user_id=user_id,
+        project_name=project_name,
+        files_data=files_data,
+    )
+
+    user_repo.log_action(user_id, f"Análisis de carpeta subida: {project_name}")
+
+    return {
+        "id": report.id,
+        "user_id": report.user_id,
+        "project_name": report.project_name,
+        "analysis_date": report.analysis_date.isoformat(),
+        "loc": report.loc,
+        "complexity": report.complexity,
+        "code_smells": report.code_smells,
+    }
+
+
+
 @router.get("/history/{user_id}")
 async def get_analysis_history(
     user_id: int,
