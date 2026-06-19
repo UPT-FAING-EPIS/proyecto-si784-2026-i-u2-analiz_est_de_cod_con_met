@@ -121,6 +121,52 @@ async def analyze_external_github_repo(
     }
 
 
+@router.post("/external/upload_folder")
+async def analyze_external_upload_folder(
+    files: list[UploadFile] = File(...),
+    project_name: str = Form(...),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Analiza múltiples archivos de una carpeta subida de forma externa sin guardar estado.
+    Perfecto para integraciones con otros microservicios.
+    """
+    user_repo = UserRepository(db)
+    
+    # Registrar la acción bajo un usuario especial "API_Externa"
+    ext_user = user_repo.get_user_by_username("API_Externa")
+    if not ext_user:
+        ext_user = user_repo.create_user(username="API_Externa", password="no_login_allowed", role="system")
+        
+    user_repo.log_action(ext_user.id, f"Análisis externo de carpeta consumido para: {project_name}")
+
+    files_data = []
+    for file in files:
+        content = await file.read()
+        try:
+            code_string = content.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        
+        filename = file.filename or "unknown"
+        ext = os.path.splitext(filename)[1].lower()
+        
+        if ext in [".java", ".cs", ".py", ".php", ".js", ".ts", ".jsx", ".tsx", ".c", ".cpp", ".h", ".go", ".rb", ".rs"]:
+            files_data.append((filename, code_string, ext))
+
+    coordinator = AnalysisCoordinator(None)
+    report_dict = coordinator.process_folder_stateless(
+        project_name=project_name,
+        files_data=files_data,
+    )
+    
+    return {
+        "status": "success",
+        "project_name": report_dict["project_name"],
+        "loc": report_dict["loc"],
+        "complexity": report_dict["complexity"],
+        "code_smells": report_dict["code_smells"],
+    }
+
 @router.post("/upload_folder")
 async def upload_folder_analysis(
     files: list[UploadFile] = File(...),
