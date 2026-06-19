@@ -1,4 +1,4 @@
-name: Versionamiento y Release
+name: Versionamiento y Despliegue
 
 on:
   workflow_dispatch:
@@ -12,6 +12,11 @@ on:
           - minor
           - major
         default: 'patch'
+      ejecutar_despliegue:
+        description: 'Desplegar la aplicación en Render'
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   versionamiento_y_release:
@@ -53,3 +58,22 @@ jobs:
           name: "Release Manual - ${{ github.event.inputs.tipo_version }}"
           draft: true
           generate_release_notes: true
+
+  despliegue_render:
+    name: Despliegue en Render
+    needs: versionamiento_y_release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.ejecutar_despliegue == 'true' }}
+    steps:
+      - name: Ejecutar Deploy Hook de Render
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$deploy_url" ]; then
+            echo "La variable RENDER_DEPLOY_HOOK_URL no está configurada en los secrets."
+            echo "Por favor, añade el deploy hook de Render (Settings -> Deploy Hook) como un secreto de GitHub (RENDER_DEPLOY_HOOK_URL)."
+            echo "Omitiendo el despliegue..."
+            exit 1
+          fi
+          echo "Disparando el despliegue en Render..."
+          curl -X POST "$deploy_url"
