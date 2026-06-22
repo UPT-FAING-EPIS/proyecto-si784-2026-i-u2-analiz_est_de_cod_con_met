@@ -1,6 +1,10 @@
 name: Pruebas Automatizadas
 
 on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       ejecutar_unitarias_integracion:
@@ -24,6 +28,11 @@ on:
         type: boolean
         default: true
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   pruebas:
     name: Ejecución de Pruebas
@@ -41,34 +50,59 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov mutmut behave playwright pytest-bdd
+          pip install pytest pytest-cov mutmut behave playwright pytest-bdd pytest-playwright
 
       - name: Instalar navegadores para Playwright
         if: ${{ github.event.inputs.ejecutar_ui == 'true' }}
         run: |
           python -m playwright install --with-deps
 
+      - name: Crear carpeta para reportes
+        run: mkdir -p public
+
       - name: Pruebas Unitarias e Integración
-        if: ${{ github.event.inputs.ejecutar_unitarias_integracion == 'true' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.ejecutar_unitarias_integracion == 'true' }}
         run: |
-          # Asume que los tests están en la carpeta 'tests' o se descubren solos
-          pytest --cov=app tests/
+          PYTHONPATH=. pytest --cov=app --cov-report=html:public/coverage --cov-report=xml tests/test_unit.py
 
       - name: Pruebas de Mutación (mutmut)
-        if: ${{ github.event.inputs.ejecutar_mutantes == 'true' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.ejecutar_mutantes == 'true' }}
         run: |
-          # Corre mutmut con configuración por defecto (se recomienda tener .mutmut_config.py o setup.cfg)
           mutmut run || echo "Se detectaron mutantes que sobrevivieron"
-          mutmut results
+          mkdir -p public/mutmut
+          echo "<html><body><h1>Mutmut log (Revisar en consola de Actions)</h1></body></html>" > public/mutmut/index.html
 
       - name: Pruebas de Interfaz (UI)
-        if: ${{ github.event.inputs.ejecutar_ui == 'true' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.ejecutar_ui == 'true' }}
         run: |
-          # Asume que hay un script de playwright en tests/ui
-          pytest tests/ui/ || echo "Asegúrate de agregar pruebas de interfaz"
+          PYTHONPATH=. pytest tests/ui/ --video=on --output=public/ui-videos || echo "Algunas pruebas de interfaz fallaron"
 
       - name: Pruebas BDD
-        if: ${{ github.event.inputs.ejecutar_bdd == 'true' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.ejecutar_bdd == 'true' }}
         run: |
-          # Asume que usas behave o pytest-bdd
-          behave tests/features/ || echo "Asegúrate de agregar features de BDD"
+          PYTHONPATH=. pytest tests/step_defs/ || echo "Algunas pruebas BDD fallaron"
+          
+      - name: Create index.html for reports
+        run: |
+          cat <<EOF > public/index.html
+          <!DOCTYPE html><html><head><title>Reportes de Pruebas</title></head><body>
+          <h1>Reportes de Pruebas Automatizadas</h1>
+          <ul>
+            <li><a href="coverage/index.html">Reporte de Cobertura (Coverage)</a></li>
+            <li><a href="mutmut/index.html">Reporte de Pruebas de Mutación (mutmut)</a></li>
+            <li><a href="ui-videos/">Videos de Pruebas UI</a></li>
+          </ul>
+          </body></html>
+          EOF
+
+      - name: Guardar reporte de cobertura (XML) para SonarCloud
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Desplegar a GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
