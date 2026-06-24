@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
                     console.warn('No se pudo calcular Content-Length de forma síncrona');
                 }
 
-                const response = await axios.post('https://analizador-estatico-upt.onrender.com/api/analysis/external/upload_folder', formData, {
+                const response = await axios.post('https://anestatico.onrender.com/api/analysis/external/upload_folder', formData, {
                     headers: headers,
                     timeout: 30000 // 30 segundos máximo de espera
                 });
