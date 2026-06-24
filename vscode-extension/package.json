@@ -2,7 +2,7 @@
   "name": "upt-code-analyzer",
   "displayName": "UPT Code Analyzer",
   "description": "Analizador Estático de Código con Métricas para UPT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "anestatico",
   "repository": {
     "type": "git",
