@@ -3,6 +3,11 @@
   "displayName": "UPT Code Analyzer",
   "description": "Analizador Estático de Código con Métricas para UPT",
   "version": "0.0.1",
+  "publisher": "anestatico",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UPT-FAING-EPIS/proyecto-si784-2026-i-u2-analiz_est_de_cod_con_met"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
