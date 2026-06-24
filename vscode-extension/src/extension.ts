@@ -86,9 +86,15 @@ function showResultsPanel(context: vscode.ExtensionContext, fileName: string, da
 }
 
 function getWebviewContent(fileName: string, data: any) {
-    const codeSmellsHtml = data.code_smells 
-        ? data.code_smells.map((smell: any) => `<li><strong>${smell.type || 'Smell'}</strong>: ${smell.description} (Línea: ${smell.line || 'N/A'})</li>`).join('') 
+    const smellsArray = data.code_smells && data.code_smells.smells 
+        ? data.code_smells.smells 
+        : (Array.isArray(data.code_smells) ? data.code_smells : []);
+
+    const codeSmellsHtml = smellsArray.length > 0 
+        ? smellsArray.map((smell: any) => `<li>${typeof smell === 'string' ? smell : JSON.stringify(smell)}</li>`).join('') 
         : '<li>No se detectaron Code Smells críticos.</li>';
+
+    const metrics = data.code_smells && data.code_smells.metrics ? data.code_smells.metrics : {};
 
     return `<!DOCTYPE html>
 <html lang="es">
@@ -99,35 +105,47 @@ function getWebviewContent(fileName: string, data: any) {
     <style>
         body { font-family: var(--vscode-font-family); padding: 20px; color: var(--vscode-editor-foreground); background-color: var(--vscode-editor-background); }
         h1 { color: var(--vscode-textLink-foreground); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .metric-card {
             background-color: var(--vscode-editorWidget-background);
             border: 1px solid var(--vscode-widget-border);
             border-radius: 6px;
             padding: 15px;
-            margin-bottom: 20px;
         }
-        .metric-title { font-size: 1.2em; margin-bottom: 5px; font-weight: bold; }
-        .metric-value { font-size: 2em; color: var(--vscode-terminal-ansiGreen); }
+        .metric-title { font-size: 1.1em; margin-bottom: 5px; font-weight: bold; }
+        .metric-value { font-size: 1.8em; color: var(--vscode-terminal-ansiGreen); }
         .smells-list { background-color: var(--vscode-input-background); padding: 15px; border-radius: 6px; border-left: 4px solid var(--vscode-terminal-ansiYellow); }
         ul { padding-left: 20px; }
-        li { margin-bottom: 10px; }
+        li { margin-bottom: 10px; line-height: 1.4; }
     </style>
 </head>
 <body>
     <h1>UPT Analyzer Report</h1>
     <h2>Archivo: ${fileName}</h2>
     
-    <div class="metric-card">
-        <div class="metric-title">Líneas de Código (LOC)</div>
-        <div class="metric-value">${data.loc}</div>
+    <div class="grid">
+        <div class="metric-card">
+            <div class="metric-title">Líneas (LOC / CLOC)</div>
+            <div class="metric-value">${data.loc} / ${metrics.cloc !== undefined ? metrics.cloc : 'N/A'}</div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-title">Complejidad</div>
+            <div class="metric-value" style="color: ${data.complexity > 10 ? 'var(--vscode-terminal-ansiRed)' : 'var(--vscode-terminal-ansiGreen)'};">${data.complexity}</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-title">Métodos (Total / Pub)</div>
+            <div class="metric-value">${metrics.nom !== undefined ? metrics.nom : 'N/A'} / ${metrics.npm !== undefined ? metrics.npm : 'N/A'}</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-title">Atributos (NOA)</div>
+            <div class="metric-value">${metrics.noa !== undefined ? metrics.noa : 'N/A'}</div>
+        </div>
     </div>
     
-    <div class="metric-card">
-        <div class="metric-title">Complejidad Ciclomática</div>
-        <div class="metric-value" style="color: ${data.complexity > 10 ? 'var(--vscode-terminal-ansiRed)' : 'var(--vscode-terminal-ansiGreen)'};">${data.complexity}</div>
-    </div>
-    
-    <div class="metric-card">
+    <div class="metric-card" style="grid-column: 1 / -1;">
         <div class="metric-title">Code Smells Encontrados</div>
         <div class="smells-list">
             <ul>
