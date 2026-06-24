@@ -43,10 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
                 });
 
                 // Enviar la petición POST al backend en Render
+                const headers = formData.getHeaders();
+                try {
+                    headers['Content-Length'] = formData.getLengthSync();
+                } catch (e) {
+                    console.warn('No se pudo calcular Content-Length de forma síncrona');
+                }
+
                 const response = await axios.post('https://analizador-estatico-upt.onrender.com/api/analysis/external/upload_folder', formData, {
-                    headers: {
-                        ...formData.getHeaders()
-                    }
+                    headers: headers,
+                    timeout: 30000 // 30 segundos máximo de espera
                 });
 
                 const data = response.data;
