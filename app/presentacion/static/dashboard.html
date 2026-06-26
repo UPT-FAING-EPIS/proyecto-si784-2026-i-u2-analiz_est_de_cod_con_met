@@ -10,6 +10,7 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     :root {
       --bg-a: #0f172a;
@@ -29,16 +30,16 @@
     }
 
     .dashboard-wrap {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
 
     .glass-card {
-      border: 0;
-      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 1.25rem;
       background: var(--card-bg);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     .chart-box {
@@ -67,11 +68,15 @@
 </head>
 <body>
   <div class="dashboard-wrap">
-    <header class="glass-card p-4 p-md-5 mb-4">
+    <header class="glass-card p-3 p-md-4 mb-3">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-          <h1 class="h3 mb-1">Dashboard de Evolución Técnica</h1>
-          <p class="text-secondary mb-0">Seguimiento de complejidad ciclomática por análisis.</p>
+          <h1 class="h3 mb-1 fw-bold">
+            <i class="bi bi-hexagon-half text-primary me-1"></i>
+            <span style="background: linear-gradient(90deg, #0ea5e9, #3b82f6); -webkit-background-clip: text; color: transparent;">AnEstatic</span> 
+            <span class="fs-5 text-secondary fw-normal ms-1 d-none d-md-inline">| Dashboard</span>
+          </h1>
+          <p class="text-secondary mb-0 small">Seguimiento de complejidad ciclomática por análisis.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="metric-chip">Usuario: <strong id="current-user">-</strong></span>
@@ -81,8 +86,18 @@
       </div>
     </header>
 
-    <section class="glass-card p-4 mb-4">
-      <h2 class="h5 mb-3">Subir Código para Análisis</h2>
+    <section class="glass-card p-3 p-md-4 mb-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h6 mb-0 text-uppercase text-secondary fw-bold">Subir Código para Análisis</h2>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="text-muted small me-1">Soportado:</span>
+          <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1 shadow-sm" title="Análisis Avanzado"><i class="bi bi-cup-hot-fill text-danger me-1"></i>Java</span>
+          <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1 shadow-sm" title="Análisis Avanzado"><i class="bi bi-filetype-py text-primary me-1"></i>Python</span>
+          <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1 shadow-sm" title="Análisis Avanzado"><i class="bi bi-filetype-cs text-success me-1"></i>C#</span>
+          <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1 shadow-sm" title="Análisis Básico"><i class="bi bi-filetype-php" style="color: #777bb4; margin-right: 0.25rem;"></i>PHP</span>
+          <span class="badge bg-light text-secondary border border-secondary-subtle px-2 py-1 shadow-sm" title="Análisis Básico (js, ts, etc)"><i class="bi bi-braces text-muted me-1"></i>Otros (Básico)</span>
+        </div>
+      </div>
       <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="pills-file-tab" data-bs-toggle="pill" data-bs-target="#pills-file" type="button" role="tab" aria-controls="pills-file" aria-selected="true">Archivo Local</button>
@@ -120,59 +135,59 @@
                 >
                   Descargar Ejemplos
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end w-100">
+                <ul class="dropdown-menu dropdown-menu-end w-100 shadow-sm border-0">
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/analizador_trafico.py" download>
-                      <span><span class="me-2">🐍</span>analizador_trafico.py</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/analizador_trafico.py" download>
+                      <span><i class="bi bi-filetype-py me-2 text-warning fs-5"></i>analizador_trafico.py</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ClienteDTO.cs" download>
-                      <span><span class="me-2">#️⃣</span>ClienteDTO.cs</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/ClienteDTO.cs" download>
+                      <span><i class="bi bi-filetype-cs me-2 text-primary fs-5"></i>ClienteDTO.cs</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ControladorPagos.cs" download>
-                      <span><span class="me-2">#️⃣</span>ControladorPagos.cs</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/ControladorPagos.cs" download>
+                      <span><i class="bi bi-filetype-cs me-2 text-primary fs-5"></i>ControladorPagos.cs</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/DeudaTecnica.java" download>
-                      <span><span class="me-2">☕</span>DeudaTecnica.java</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/DeudaTecnica.java" download>
+                      <span><i class="bi bi-filetype-java me-2 text-danger fs-5"></i>DeudaTecnica.java</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ProcesadorNomina.cs" download>
-                      <span><span class="me-2">#️⃣</span>ProcesadorNomina.cs</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/ProcesadorNomina.cs" download>
+                      <span><i class="bi bi-filetype-cs me-2 text-primary fs-5"></i>ProcesadorNomina.cs</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/Prueba.java" download>
-                      <span><span class="me-2">☕</span>Prueba.java</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/Prueba.java" download>
+                      <span><i class="bi bi-filetype-java me-2 text-danger fs-5"></i>Prueba.java</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/SistemaMonolitico.java" download>
-                      <span><span class="me-2">☕</span>SistemaMonolitico.java</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/SistemaMonolitico.java" download>
+                      <span><i class="bi bi-filetype-java me-2 text-danger fs-5"></i>SistemaMonolitico.java</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/UsuarioDTO.java" download>
-                      <span><span class="me-2">☕</span>UsuarioDTO.java</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/UsuarioDTO.java" download>
+                      <span><i class="bi bi-filetype-java me-2 text-danger fs-5"></i>UsuarioDTO.java</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3" href="/examples/ValidadorSeguridad.java" download>
-                      <span><span class="me-2">☕</span>ValidadorSeguridad.java</span>
-                      <span class="text-muted small">Descargar</span>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center gap-3 py-2" href="/examples/ValidadorSeguridad.java" download>
+                      <span><i class="bi bi-filetype-java me-2 text-danger fs-5"></i>ValidadorSeguridad.java</span>
+                      <i class="bi bi-download text-muted small"></i>
                     </a>
                   </li>
                 </ul>
@@ -220,31 +235,37 @@
       <div id="upload-status" class="mt-3"></div>
     </section>
 
-    <section class="glass-card p-4 mb-5">
+    <section class="glass-card p-3 p-md-4 mb-3">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h2 class="h5 mb-0">Evolución de Deuda Técnica (Complejidad)
+        <h2 class="h6 mb-0 d-flex align-items-center gap-2 text-uppercase text-secondary fw-bold">
+          Evolución de Deuda Técnica
           <span
             class="info-tip"
             data-bs-toggle="tooltip"
             title="Evolución histórica de LOC y complejidad por análisis."
             aria-label="Información del gráfico histórico"
-          >ℹ️</span>
+          ><i class="bi bi-info-circle text-primary"></i></span>
         </h2>
-        <button id="refresh-history" class="btn btn-outline-secondary btn-sm" type="button">Actualizar</button>
+        <div class="d-flex align-items-center gap-2">
+          <select id="project-filter" class="form-select form-select-sm" style="width: auto; min-width: 150px;">
+            <option value="all">Todos los proyectos</option>
+          </select>
+          <button id="refresh-history" class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+        </div>
       </div>
 
       <!-- Métricas principales en tarjetas -->
       <div class="row g-3 mb-4" id="metrics-cards">
         <div class="col-6 col-md-3">
-          <div class="card text-white bg-primary h-100">
-            <div class="card-body">
-              <h6 class="card-title">NOM
+          <div class="card text-white bg-primary h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-2 p-md-3">
+              <h6 class="card-title mb-1">NOM
                 <span
                   class="info-tip"
                   data-bs-toggle="tooltip"
                   title="Número Total de Métodos detectados en el código."
                   aria-label="Información NOM"
-                >ℹ️</span>
+                ><i class="bi bi-info-circle opacity-75"></i></span>
               </h6>
               <p class="card-text display-6 mb-0" id="metric-nom">0</p>
               <small class="text-white-50">Número de métodos</small>
@@ -252,15 +273,15 @@
           </div>
         </div>
         <div class="col-6 col-md-3">
-          <div class="card text-white bg-success h-100">
-            <div class="card-body">
-              <h6 class="card-title">NPM
+          <div class="card text-white bg-success h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-2 p-md-3">
+              <h6 class="card-title mb-1">NPM
                 <span
                   class="info-tip"
                   data-bs-toggle="tooltip"
                   title="Número de Métodos Públicos (modificador public)."
                   aria-label="Información NPM"
-                >ℹ️</span>
+                ><i class="bi bi-info-circle opacity-75"></i></span>
               </h6>
               <p class="card-text display-6 mb-0" id="metric-npm">0</p>
               <small class="text-white-50">Métodos públicos</small>
@@ -268,15 +289,15 @@
           </div>
         </div>
         <div class="col-6 col-md-3">
-          <div class="card text-white bg-warning h-100">
-            <div class="card-body">
-              <h6 class="card-title">NOA
+          <div class="card text-white bg-warning h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-2 p-md-3">
+              <h6 class="card-title mb-1">NOA
                 <span
                   class="info-tip"
                   data-bs-toggle="tooltip"
                   title="Número de Atributos/Campos declarados en la clase."
                   aria-label="Información NOA"
-                >ℹ️</span>
+                ><i class="bi bi-info-circle opacity-75"></i></span>
               </h6>
               <p class="card-text display-6 mb-0" id="metric-noa">0</p>
               <small class="text-white-50">Número de atributos</small>
@@ -284,15 +305,15 @@
           </div>
         </div>
         <div class="col-6 col-md-3">
-          <div class="card text-white bg-danger h-100">
-            <div class="card-body">
-              <h6 class="card-title">CLOC
+          <div class="card text-white bg-danger h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-2 p-md-3">
+              <h6 class="card-title mb-1">CLOC
                 <span
                   class="info-tip"
                   data-bs-toggle="tooltip"
                   title="Líneas de Comentario detectadas en el archivo."
                   aria-label="Información CLOC"
-                >ℹ️</span>
+                ><i class="bi bi-info-circle opacity-75"></i></span>
               </h6>
               <p class="card-text display-6 mb-0" id="metric-cloc">0</p>
               <small class="text-white-50">Líneas de comentario</small>
@@ -311,7 +332,7 @@
               data-bs-toggle="tooltip"
               title="Gráfico de líneas de la evolución temporal por análisis."
               aria-label="Información gráfico histórico"
-            >ℹ️</span>
+            ><i class="bi bi-info-circle text-primary"></i></span>
           </div>
           <div class="chart-box">
             <canvas id="historyChart"></canvas>
@@ -325,7 +346,7 @@
               data-bs-toggle="tooltip"
               title="Compara NOM (métodos), NPM (públicos) y NOA (atributos) del análisis más reciente."
               aria-label="Información gráfico de barras"
-            >ℹ️</span>
+            ><i class="bi bi-info-circle text-primary"></i></span>
           </div>
           <div class="chart-box">
             <canvas id="structureChart"></canvas>
@@ -339,16 +360,33 @@
       <div id="history-status" class="mt-3"></div>
     </section>
 
-    <section class="glass-card p-4 mb-4 d-none" id="file-details-section">
+    <section class="glass-card p-3 p-md-4 mb-3 d-none" id="file-details-section">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h2 class="h5 mb-0">Detalle por Archivos (Último Análisis)
-          <span class="info-tip" data-bs-toggle="tooltip" title="Lista de archivos analizados. Clic izquierdo para ver en Archivo A, clic derecho para ver en Archivo B.">ℹ️</span>
+        <h2 class="h6 mb-0 text-uppercase text-secondary fw-bold">Detalle por Archivos (Último Análisis)
+          <span class="info-tip" data-bs-toggle="tooltip" title="Lista de archivos analizados. Clic izquierdo para ver en Archivo A, clic derecho para ver en Archivo B."><i class="bi bi-info-circle text-primary"></i></span>
         </h2>
       </div>
+      
+      <!-- Resumen General del Proyecto -->
+      <div id="project-smells-summary" class="alert mb-4 d-none border-0 shadow-sm">
+        <h3 class="h6 alert-heading mb-1"><i class="bi bi-shield-exclamation me-2"></i>Resumen General de Problemas</h3>
+        <p class="mb-0 small" id="project-smells-text"></p>
+      </div>
+
       <div class="row">
         <div class="col-md-4">
-          <div class="mb-2 d-flex gap-2">
-            <input type="text" id="file-search" class="form-control form-control-sm" placeholder="Buscar archivo..." oninput="applyFileFilters()">
+          <div class="mb-2 d-flex gap-2 flex-wrap">
+            <input type="text" id="file-search" class="form-control form-control-sm flex-grow-1" style="min-width: 150px;" placeholder="Buscar archivo..." oninput="applyFileFilters()">
+            <select id="file-ext-filter" class="form-select form-select-sm" style="width: auto;" onchange="applyFileFilters()">
+              <option value="all">Todo ext.</option>
+              <option value=".java">.java</option>
+              <option value=".py">.py</option>
+              <option value=".cs">.cs</option>
+              <option value=".js">.js</option>
+              <option value=".ts">.ts</option>
+              <option value=".php">.php</option>
+              <option value="other">Otros</option>
+            </select>
             <select id="file-sort" class="form-select form-select-sm" style="width: auto;" onchange="applyFileFilters()">
               <option value="name_asc">A-Z</option>
               <option value="name_desc">Z-A</option>
@@ -430,6 +468,23 @@
     let historyChartInstance = null;
     let structureChartInstance = null;
     let historyReportsCache = [];
+    let currentProjectFilter = "all";
+
+    const projectFilterSelect = document.getElementById("project-filter");
+
+    projectFilterSelect.addEventListener("change", (e) => {
+      currentProjectFilter = e.target.value;
+      updateCharts();
+    });
+
+    function updateCharts() {
+      let filteredReports = historyReportsCache;
+      if (currentProjectFilter !== "all") {
+        filteredReports = historyReportsCache.filter(r => (r.project_name || "Sin nombre") === currentProjectFilter);
+      }
+      drawHistoryChart(filteredReports);
+      renderStructureFromLast(filteredReports);
+    }
 
     function showStatus(target, message, type) {
       target.innerHTML = `<div class="alert alert-${type} py-2 mb-0" role="alert">${message}</div>`;
@@ -751,17 +806,61 @@
     
     function renderFileList(files) {
       currentFilesData = files;
+      
+      let totalSmells = 0;
+      let filesWithSmells = 0;
+      files.forEach(f => {
+        if (f.smells && f.smells.length > 0) {
+          totalSmells += f.smells.length;
+          filesWithSmells++;
+        }
+      });
+      
+      const summaryDiv = document.getElementById("project-smells-summary");
+      const summaryText = document.getElementById("project-smells-text");
+      
+      if (totalSmells > 0) {
+        summaryDiv.classList.remove("d-none", "alert-success", "alert-info");
+        summaryDiv.classList.add("alert-warning");
+        summaryText.innerHTML = `Se detectaron <strong>${totalSmells} problemas de código</strong> en <strong>${filesWithSmells} de ${files.length} archivos</strong>. Selecciona los archivos de la lista para ver el detalle.`;
+      } else if (files.length > 0) {
+        summaryDiv.classList.remove("d-none", "alert-warning", "alert-info");
+        summaryDiv.classList.add("alert-success");
+        summaryText.innerHTML = `<strong>Excelente:</strong> No se detectaron problemas de código en los ${files.length} archivos analizados del proyecto.`;
+      } else {
+        summaryDiv.classList.add("d-none");
+      }
+
       // Reiniciar buscador y filtros cuando llegan archivos nuevos
       document.getElementById("file-search").value = "";
       document.getElementById("file-sort").value = "name_asc";
+      const extFilter = document.getElementById("file-ext-filter");
+      if (extFilter) extFilter.value = "all";
       applyFileFilters();
     }
 
     function applyFileFilters() {
       const search = document.getElementById("file-search").value.toLowerCase();
       const sort = document.getElementById("file-sort").value;
+      const extFilter = document.getElementById("file-ext-filter")?.value || "all";
       
-      let filtered = currentFilesData.filter(file => file.file_path.toLowerCase().includes(search));
+      let filtered = currentFilesData.filter(file => {
+        const filePath = file.file_path.toLowerCase();
+        
+        if (!filePath.includes(search)) return false;
+        
+        if (extFilter !== "all") {
+          if (extFilter === "other") {
+            const knownExts = [".java", ".py", ".cs", ".js", ".ts", ".php"];
+            const isKnown = knownExts.some(ext => filePath.endsWith(ext));
+            if (isKnown) return false;
+          } else {
+            if (!filePath.endsWith(extFilter)) return false;
+          }
+        }
+        
+        return true;
+      });
       
       filtered.sort((a, b) => {
         const nameA = a.file_path.split(/[\\/]/).pop().toLowerCase();
@@ -840,8 +939,24 @@
         clearStatus(historyStatus);
         const reports = await fetchHistoryData();
         historyReportsCache = reports;
-        drawHistoryChart(reports);
-        renderStructureFromLast(reports);
+        
+        const projects = [...new Set(reports.map(r => r.project_name || "Sin nombre"))];
+        const prevSelected = projectFilterSelect.value;
+        projectFilterSelect.innerHTML = '<option value="all">Todos los proyectos</option>';
+        projects.forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p;
+          opt.textContent = p;
+          projectFilterSelect.appendChild(opt);
+        });
+        if (projects.includes(prevSelected)) {
+          projectFilterSelect.value = prevSelected;
+        } else {
+          projectFilterSelect.value = "all";
+          currentProjectFilter = "all";
+        }
+        
+        updateCharts();
 
         if (reports.length === 0) {
           showStatus(historyStatus, "Aún no hay reportes para este usuario.", "info");
